@@ -1,0 +1,360 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>لوحة إدارة — System RestorOn</title>
+  <style>
+    /* --- Basic Reset --- */
+    * { box-sizing: border-box; margin: 0; padding: 0; font-family: "Segoe UI", Tahoma, Arial, sans-serif; }
+    html,body { height: 100%; background: #f5f7fb; color:#0f1724; }
+    a { color: inherit; text-decoration: none; }
+
+    /* --- Layout --- */
+    .app { display: grid; grid-template-columns: 260px 1fr; gap: 20px; min-height:100vh; padding:20px; }
+    @media (max-width:900px){ .app{ grid-template-columns: 1fr; } .sidebar{ position:relative; } .topbar { margin-top: 10px; } }
+
+    /* --- Sidebar --- */
+    .sidebar {
+      background: linear-gradient(180deg,#0ea5a4 0%, #0284c7 100%);
+      color: #fff;
+      border-radius: 16px;
+      padding: 18px;
+      display:flex; flex-direction:column; gap:16px;
+      box-shadow: 0 8px 20px rgba(2,6,23,0.08);
+      height: fit-content;
+    }
+    .brand { display:flex; align-items:center; gap:12px; font-weight:700; font-size:18px; }
+    .brand .logo { width:44px; height:44px; border-radius:10px; background:rgba(255,255,255,0.12); display:flex; align-items:center; justify-content:center; }
+    .nav { display:flex; flex-direction:column; gap:8px; margin-top:6px; }
+    .nav a { padding:10px 12px; border-radius:10px; display:flex; align-items:center; gap:10px; font-weight:600; color:rgba(255,255,255,0.95); }
+    .nav a.active, .nav a:hover { background: rgba(255,255,255,0.08); }
+
+    /* --- Main content --- */
+    .main { display:flex; flex-direction:column; gap:18px; }
+    .topbar { display:flex; justify-content:space-between; align-items:center; gap:12px; padding:12px 18px; background:#fff; border-radius:12px; box-shadow: 0 6px 18px rgba(2,6,23,0.04); }
+    .search { display:flex; align-items:center; gap:8px; padding:8px; background:#f1f5f9; border-radius:10px; min-width:240px; }
+    .search input { border:0; background:transparent; outline:none; font-size:14px; padding:6px; }
+
+    /* --- Stats cards --- */
+    .cards { display:grid; grid-template-columns: repeat(3, 1fr); gap:12px; }
+    @media (max-width:900px){ .cards{ grid-template-columns: repeat(1,1fr); } }
+    .card { background:#fff; padding:14px; border-radius:12px; box-shadow:0 6px 16px rgba(2,6,23,0.04); display:flex; justify-content:space-between; align-items:center; gap:12px; }
+    .card .num { font-size:20px; font-weight:800; }
+    .card .label { font-size:13px; color:#475569; }
+
+    /* --- Grid area for table + form --- */
+    .grid { display:grid; grid-template-columns: 1fr 360px; gap:12px; }
+    @media (max-width:1100px){ .grid{ grid-template-columns: 1fr; } }
+
+    /* --- Table --- */
+    .panel { background:#fff; border-radius:12px; padding:14px; box-shadow:0 6px 18px rgba(2,6,23,0.04); }
+    table { width:100%; border-collapse: collapse; font-size:14px; }
+    th, td { padding:10px 8px; text-align:right; border-bottom:1px solid #f1f5f9; }
+    th { font-size:13px; color:#475569; font-weight:700; text-transform:uppercase; }
+    .status { font-weight:700; padding:6px 10px; border-radius:999px; font-size:12px; display:inline-block; }
+    .status.pending { background:#fff7ed; color:#b45309; }
+    .status.done { background:#ecfeff; color:#065f46; }
+    .btn { display:inline-block; padding:8px 12px; border-radius:8px; background:#0284c7; color:#fff; font-weight:700; cursor:pointer; border:0; }
+
+    /* --- Form --- */
+    .form-group { display:flex; flex-direction:column; gap:6px; margin-bottom:10px; }
+    label { font-size:13px; color:#334155; }
+    input[type="text"], input[type="number"], textarea, select {
+      padding:10px; border-radius:8px; border:1px solid #e6eef7; outline:none; font-size:14px; background:#fcfeff;
+    }
+    textarea { resize:vertical; min-height:80px; }
+
+    /* --- small helpers --- */
+    .muted { color:#64748b; font-size:13px; }
+    .row { display:flex; gap:8px; align-items:center; }
+    .avatar { width:40px; height:40px; border-radius:10px; background:#f1f5f9; display:flex; align-items:center; justify-content:center; font-weight:800; color:#0f1724; }
+  </style>
+</head>
+<body>
+  <div class="app">
+    <!-- SIDEBAR -->
+    <aside class="sidebar" aria-label="الشريط الجانبي">
+      <div class="brand">
+        <div class="logo">🍽</div>
+        <div>
+          <div>System RestorOn</div>
+          <div class="muted" style="font-size:12px;margin-top:4px;">لوحة التحكم</div>
+        </div>
+      </div>
+
+      <nav class="nav" aria-label="قائمة">
+        <a href="#" class="active">الداشبورد</a>
+        <a href="#" onclick="showSection('orders')">الطلبات</a>
+        <a href="#" onclick="showSection('menu')">قائمة الطعام</a>
+        <a href="#" onclick="showSection('settings')">الإعدادات</a>
+      </nav>
+
+      <div style="margin-top:auto;">
+        <div class="muted" style="font-size:13px;">مستخدم</div>
+        <div class="row" style="margin-top:8px;">
+          <div class="avatar">س</div>
+          <div>
+            <div style="font-weight:700;">سارة عزوز</div>
+            <div class="muted" style="font-size:12px;">المدير العام</div>
+          </div>
+        </div>
+      </div>
+    </aside>
+
+    <!-- MAIN -->
+    <main class="main">
+      <!-- TOPBAR -->
+      <div class="topbar">
+        <div class="search">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none"><path d="M21 21l-4.35-4.35" stroke="#64748b" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          <input id="searchInput" placeholder="بحث عن طلب، صنف، عميل..." />
+        </div>
+        <div style="display:flex; gap:10px; align-items:center;">
+          <button class="btn" onclick="refresh()">تحديث</button>
+        </div>
+      </div>
+
+      <!-- CARDS -->
+      <div class="cards">
+        <div class="card">
+          <div>
+            <div class="num" id="totalOrders">--</div>
+            <div class="label">عدد الطلبات اليوم</div>
+          </div>
+          <div class="muted">📦</div>
+        </div>
+
+        <div class="card">
+          <div>
+            <div class="num" id="pendingOrders">--</div>
+            <div class="label">قيد الانتظار</div>
+          </div>
+          <div class="muted">⏳</div>
+        </div>
+
+        <div class="card">
+          <div>
+            <div class="num" id="revenue">-- دج</div>
+            <div class="label">إجمالي المدفوعات اليوم</div>
+          </div>
+          <div class="muted">💰</div>
+        </div>
+      </div>
+
+      <!-- GRID: TABLE + FORM -->
+      <div class="grid">
+        <!-- ORDERS TABLE -->
+        <section class="panel" id="ordersSection">
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
+            <h3>الطلبات الحديثة</h3>
+            <div class="muted">تحديث آخر: <span id="lastUpdated">--</span></div>
+          </div>
+
+          <table id="ordersTable" aria-label="جدول الطلبات">
+            <thead>
+              <tr>
+                <th>رقم</th>
+                <th>العميل</th>
+                <th>المجموع</th>
+                <th>الحالة</th>
+                <th>الإجراء</th>
+              </tr>
+            </thead>
+            <tbody>
+              <!-- rows injected by JS -->
+            </tbody>
+          </table>
+        </section>
+
+        <!-- FORM / MENU MANAGEMENT -->
+        <aside class="panel" id="menuSection">
+          <h3>إضافة صنف جديد</h3>
+          <p class="muted" style="margin-bottom:12px;">املأ الحقول ثم اضغط حفظ.</p>
+
+          <div>
+            <div class="form-group">
+              <label>اسم الصنف</label>
+              <input id="itemName" type="text" placeholder="مثال: بيتزا مارجريتا" />
+            </div>
+
+            <div class="form-group">
+              <label>السعر (دج)</label>
+              <input id="itemPrice" type="number" placeholder="مثال: 1200" />
+            </div>
+
+            <div class="form-group">
+              <label>الوصف</label>
+              <textarea id="itemDesc" placeholder="وصف الصنف..."></textarea>
+            </div>
+
+            <div style="display:flex; gap:8px;">
+              <button class="btn" onclick="addMenuItem()">حفظ الصنف</button>
+              <button style="padding:8px 12px;border-radius:8px;background:#e2e8f0;border:0;font-weight:700;cursor:pointer;" onclick="loadMenu()">تحميل القائمة</button>
+            </div>
+
+            <hr style="margin:12px 0;border:none;border-top:1px solid #f1f5f9;" />
+
+            <h4 style="margin-bottom:8px;">روابط مفيدة</h4>
+            <div class="muted" style="font-size:13px;">
+              API: <code>/api/orders</code>, <code>/api/menu</code><br/>
+              طريقة الإرسال: JSON (POST/GET/PUT/DELETE)
+            </div>
+          </div>
+        </aside>
+      </div>
+    </main>
+  </div>
+
+  <!-- --- JS: Frontend logic + examples of fetch to backend --- -->
+  <script>
+    // ---------- Utility: show section ----------
+    function showSection(name){
+      document.getElementById('ordersSection').style.display = name === 'orders' ? 'block' : 'block';
+      // for now we don't hide main sections to keep simple -- you can customize
+    }
+
+    // ---------- Mock / real: base API URL ----------
+    // إذا لديك سيرفر محلي غير ذلك غيّر BASE_URL
+    const BASE_URL = ''; // مثال: 'http://localhost:3000'
+
+    // ---------- Render orders ----------
+    async function fetchOrders(){
+      try {
+        const res = await (BASE_URL ? fetch(BASE_URL + '/api/orders') : Promise.resolve({ ok:true, json: async ()=> mockOrders() }));
+        if (!res.ok) throw new Error('خطأ في جلب الطلبات');
+        const orders = await res.json();
+        renderOrders(orders);
+      } catch (err) {
+        console.error(err);
+        alert('فشل في جلب الطلبات — عرض بيانات تجريبية');
+        renderOrders(await mockOrders());
+      }
+    }
+
+    function renderOrders(orders){
+      const tbody = document.querySelector('#ordersTable tbody');
+      tbody.innerHTML = '';
+      let total = 0, pending = 0;
+      orders.forEach((o, idx) => {
+        total += o.total;
+        if (o.status === 'pending') pending++;
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+          <td>${o.id}</td>
+          <td>${o.customer}</td>
+          <td>${o.total} دج</td>
+          <td><span class="status ${o.status==='done' ? 'done' : 'pending'}">${o.status === 'done' ? 'مكتمل' : 'قيد التحضير'}</span></td>
+          <td>
+            <button class="btn" onclick="markDone(${o.id})">تم</button>
+            <button style="margin-left:6px;padding:6px 8px;border-radius:8px;border:1px solid #e6eef7;background:#fff;cursor:pointer;" onclick="deleteOrder(${o.id})">حذف</button>
+          </td>
+        `;
+        tbody.appendChild(tr);
+      });
+
+      document.getElementById('totalOrders').textContent = orders.length;
+      document.getElementById('pendingOrders').textContent = pending;
+      document.getElementById('revenue').textContent = total + ' دج';
+      document.getElementById('lastUpdated').textContent = new Date().toLocaleString('ar-DZ');
+    }
+
+    // ---------- Actions ----------
+    async function markDone(id){
+      // مثال اتصال لباك اند:
+      try {
+        if (BASE_URL) {
+          const res = await fetch(BASE_URL + '/api/orders/' + id + '/complete', { method: 'POST' });
+          if (!res.ok) throw new Error();
+        } else {
+          console.log('Mock: marking done', id);
+        }
+        refresh();
+      } catch {
+        alert('فشل تحديث الحالة');
+      }
+    }
+
+    async function deleteOrder(id){
+      if (!confirm('هل تريد حذف الطلب رقم ' + id + '؟')) return;
+      try {
+        if (BASE_URL) {
+          const res = await fetch(BASE_URL + '/api/orders/' + id, { method: 'DELETE' });
+          if (!res.ok) throw new Error();
+        } else {
+          console.log('Mock: delete', id);
+        }
+        refresh();
+      } catch {
+        alert('فشل في حذف الطلب');
+      }
+    }
+
+    // ---------- Menu management ----------
+    async function addMenuItem(){
+      const name = document.getElementById('itemName').value.trim();
+      const price = Number(document.getElementById('itemPrice').value);
+      const desc = document.getElementById('itemDesc').value.trim();
+      if(!name || !price){ alert('املأ الاسم والسعر'); return; }
+
+      const payload = { name, price, description: desc };
+
+      try {
+        if (BASE_URL) {
+          const res = await fetch(BASE_URL + '/api/menu', {
+            method: 'POST',
+            headers: { 'Content-Type':'application/json' },
+            body: JSON.stringify(payload)
+          });
+          if (!res.ok) throw new Error();
+        } else {
+          console.log('Mock add menu item:', payload);
+        }
+        alert('تم حفظ الصنف');
+        document.getElementById('itemName').value = '';
+        document.getElementById('itemPrice').value = '';
+        document.getElementById('itemDesc').value = '';
+      } catch {
+        alert('فشل حفظ الصنف');
+      }
+    }
+
+    async function loadMenu(){
+      try {
+        if (BASE_URL) {
+          const res = await fetch(BASE_URL + '/api/menu');
+          if (!res.ok) throw new Error();
+          const menu = await res.json();
+          console.log(menu);
+          alert('تم تحميل القائمة — افحص الـ console.');
+        } else {
+          console.log('Mock menu loaded', await mockMenu());
+          alert('عرض بيانات تجريبية في console.');
+        }
+      } catch {
+        alert('فشل تحميل القائمة');
+      }
+    }
+
+    // ---------- Refresh ----------
+    function refresh(){
+      fetchOrders();
+    }
+
+    // ---------- Mock data (للاختبار بدون سيرفر) ----------
+    async function mockOrders(){
+      return [
+        { id: 101, customer: 'أحمد', total: 1250, status: 'pending' },
+        { id: 102, customer: 'ليلى', total: 980, status: 'done' },
+        { id: 103, customer: 'يوسف', total: 1450, status: 'pending' }
+      ];
+    }
+    async function mockMenu(){
+      return [{ name:'بيتزا مارجريتا', price:1200 }, { name:'سلطة خضراء', price:450 }];
+    }
+
+    // ---------- inizialize ----------
+    fetchOrders();
+  </script>
+</body>
+</html>
